@@ -5,96 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Simurg: Neon Genesis</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon-gold: #ffcc00; --neon-blue: #00f2ff; --deep-bg: #050505; }
-        body { margin: 0; background: var(--deep-bg); color: white; font-family: 'Rajdhani', sans-serif; overflow: hidden; user-select: none; }
+        :root { --gold: #ffcc00; --blue: #00f2ff; --bg: #050505; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Rajdhani', sans-serif; overflow: hidden; user-select: none; touch-action: manipulation; }
+        #app { height: 100vh; display: flex; flex-direction: column; background: radial-gradient(circle at center, #1a1a1a, #000); }
         
-        #app { 
-            height: 100vh; display: flex; flex-direction: column;
-            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
-        }
-
-        /* ÜST PANEL: ENERJİ DURUMU */
-        .status-bar {
-            padding: 25px; text-align: center; border-bottom: 2px solid rgba(0, 242, 255, 0.2);
-            background: rgba(255,255,255,0.02); backdrop-filter: blur(10px);
-        }
-        .label { font-family: 'Orbitron'; font-size: 10px; letter-spacing: 3px; color: var(--neon-blue); margin-bottom: 5px; }
-        .energy-value { font-family: 'Orbitron'; font-size: 3.2rem; color: var(--neon-gold); text-shadow: 0 0 20px rgba(255, 204, 0, 0.6); }
-
-        /* ANA SİMURG BUTONU - ARTIK DOĞRU GÖRSELLE */
-        .core { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
-        .simurg-avatar {
+        .status { padding: 30px; text-align: center; border-bottom: 2px solid rgba(0, 242, 255, 0.2); background: rgba(255,255,255,0.02); backdrop-filter: blur(10px); }
+        .label { font-family: 'Orbitron'; font-size: 11px; letter-spacing: 4px; color: var(--blue); margin-bottom: 8px; }
+        .val { font-family: 'Orbitron'; font-size: 3.8rem; color: var(--gold); text-shadow: 0 0 30px rgba(255, 204, 0, 0.6); }
+        
+        .core { flex: 1; display: flex; justify-content: center; align-items: center; }
+        
+        /* BU KISIM SENİN YÜKLEDİĞİN neon_simurg.jpg DOSYASINI KULLANIR */
+        .btn {
             width: 300px; height: 300px; border-radius: 50%;
-            /* PROFESYONEL SİMURG LOGOSU */
-            background: url('https://img.freepik.com/premium-vector/elegant-phoenix-logo-design_105238-164.jpg') center/cover;
-            border: 5px solid var(--neon-gold); box-shadow: 0 0 50px rgba(255, 204, 0, 0.4);
-            transition: transform 0.05s; z-index: 2;
-            cursor: pointer;
+            background: url('neon_simurg.jpg') center/cover no-repeat;
+            border: 6px solid var(--gold); box-shadow: 0 0 60px rgba(255, 204, 0, 0.4);
+            transition: transform 0.05s; cursor: pointer;
         }
-        .simurg-avatar:active { transform: scale(0.92); }
-
-        /* ALT NAVİGASYON (SADE VE ŞIK) */
-        .dock { 
-            display: flex; justify-content: space-around; padding: 25px; 
-            background: #000; border-top: 1px solid var(--neon-blue);
-        }
-        .dock-item { font-family: 'Orbitron'; font-size: 9px; color: #555; font-weight: bold; }
-        .dock-item.active { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
-
-        /* TIKLAMA EFEKTİ */
-        .tap-effect {
-            position: absolute; color: var(--neon-gold); font-family: 'Orbitron';
-            font-size: 35px; animation: floatUp 0.6s ease-out forwards; pointer-events: none;
-        }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-120px); } }
+        .btn:active { transform: scale(0.92); }
+        
+        .dock { display: flex; justify-content: space-around; padding: 25px; background: #000; border-top: 1px solid var(--blue); }
+        .item { font-family: 'Orbitron'; font-size: 10px; color: #555; font-weight: bold; }
+        .active { color: var(--blue); text-shadow: 0 0 15px var(--blue); }
+        
+        .pop { position: absolute; color: var(--gold); font-family: 'Orbitron'; font-size: 40px; animation: up 0.7s forwards; pointer-events: none; z-index: 10; }
+        @keyframes up { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-150px); } }
     </style>
 </head>
 <body>
     <div id="app">
-        <div class="status-bar">
+        <div class="status">
             <div class="label">NEO-ANKARA ENERJİ GÜCÜ</div>
-            <div id="balance" class="energy-value">0</div>
+            <div id="bal" class="val">0</div>
         </div>
-
-        <div class="core" id="main-btn">
-            <div class="simurg-avatar"></div>
+        <div class="core" id="tap">
+            <div class="btn"></div>
         </div>
-
         <div class="dock">
-            <div class="dock-item">ARSİV</div>
-            <div class="dock-item">GELİŞTİR</div>
-            <div class="dock-item active">MERKEZ</div>
-            <div class="dock-item">İTTİFAK</div>
-            <div class="dock-item">CÜZDAN</div>
+            <div class="item">ARSİV</div>
+            <div class="item">GELİŞTİR</div>
+            <div class="item active">MERKEZ</div>
+            <div class="item">İTTİFAK</div>
+            <div class="item">CÜZDAN</div>
         </div>
     </div>
-
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-
-        let score = parseInt(localStorage.getItem('simurg_power')) || 0;
-        const balEl = document.getElementById('balance');
-        balEl.innerText = score.toLocaleString();
-
-        document.getElementById('main-btn').addEventListener('click', (e) => {
-            score++;
-            balEl.innerText = score.toLocaleString();
-            localStorage.setItem('simurg_power', score);
-            
-            // Titreşim desteği
+        let s = parseInt(localStorage.getItem('p')) || 0;
+        const el = document.getElementById('bal');
+        el.innerText = s.toLocaleString();
+        
+        document.getElementById('tap').addEventListener('pointerdown', (e) => {
+            s++; el.innerText = s.toLocaleString();
+            localStorage.setItem('p', s);
             if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-
-            // Tıklama animasyonu
-            const effect = document.createElement('div');
-            effect.className = 'tap-effect';
-            effect.innerText = '+1';
-            effect.style.left = (e.clientX || window.innerWidth / 2) + 'px';
-            effect.style.top = (e.clientY || window.innerHeight / 2) + 'px';
-            document.body.appendChild(effect);
-            setTimeout(() => effect.remove(), 600);
+            const p = document.createElement('div');
+            p.className = 'pop'; p.innerText = '+1';
+            p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 700);
         });
     </script>
 </body>
