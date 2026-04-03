@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simurg Operasyon Merkezi</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #f3ba2f; --blue: #00d4ff; --dark: #050505; }
+        body { margin: 0; background: var(--dark); color: white; font-family: 'Inter', sans-serif; overflow: hidden; user-select: none; }
+        #app { height: 100vh; display: flex; flex-direction: column; background: radial-gradient(circle at center, #1a1a1a, #050505); }
+        .header { padding: 20px; text-align: center; background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .balance { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; color: var(--gold); text-shadow: 0 0 25px rgba(243,186,47,0.5); margin: 5px 0; }
+        .main { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+        .simurg-btn {
+            width: 260px; height: 260px; border-radius: 50%;
+            background: url('https://img.freepik.com/free-vector/golden-phoenix-logo-design-vector_53876-136311.jpg') center/cover;
+            border: 5px solid var(--gold); box-shadow: 0 0 50px rgba(243,186,47,0.3);
+            transition: transform 0.05s; cursor: pointer;
+        }
+        .simurg-btn:active { transform: scale(0.94); }
+        .nav { display: flex; justify-content: space-around; padding: 20px; background: #000; border-top: 1px solid var(--blue); }
+        .nav-item { font-size: 10px; color: #555; font-weight: bold; text-transform: uppercase; }
+        .active { color: var(--blue); text-shadow: 0 0 10px var(--blue); }
+        .pop { position: absolute; color: var(--gold); font-weight: bold; font-size: 30px; animation: fly 0.6s forwards; pointer-events: none; font-family: 'Orbitron'; }
+        @keyframes fly { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-120px); } }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+            <small style="color: var(--blue); letter-spacing: 2px;">SIMURG COMMAND CENTER</small>
+            <div class="balance" id="score">0</div>
+        </div>
+        <div class="main" id="tap-zone">
+            <div class="simurg-btn"></div>
+        </div>
+        <div class="nav">
+            <div class="nav-item">GÖREVLER</div>
+            <div class="nav-item active">ANA SAYFA</div>
+            <div class="nav-item">SİGORTA</div>
+            <div class="nav-item">CÜZDAN</div>
+        </div>
+    </div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        let score = parseInt(localStorage.getItem('simurg_sc')) || 0;
+        const el = document.getElementById('score');
+        el.innerText = score.toLocaleString();
+
+        document.getElementById('tap-zone').addEventListener('click', (e) => {
+            score++;
+            el.innerText = score.toLocaleString();
+            localStorage.setItem('simurg_sc', score);
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+            const p = document.createElement('div');
+            p.className = 'pop'; p.innerText = '+1';
+            p.style.left = (e.clientX || window.innerWidth/2) + 'px';
+            p.style.top = (e.clientY || window.innerHeight/2) + 'px';
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 600);
+        });
+    </script>
+</body>
+</html>
