@@ -3,71 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simurg: Neon Genesis</title>
+    <title>ADN Nebula: Simurg Genesis</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #ffcc00; --blue: #00f2ff; --bg: #050505; }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'Rajdhani', sans-serif; overflow: hidden; user-select: none; touch-action: manipulation; }
-        #app { height: 100vh; display: flex; flex-direction: column; background: radial-gradient(circle at center, #1a1a1a, #000); }
-        
-        .status { padding: 30px; text-align: center; border-bottom: 2px solid rgba(0, 242, 255, 0.2); background: rgba(255,255,255,0.02); backdrop-filter: blur(10px); }
-        .label { font-family: 'Orbitron'; font-size: 11px; letter-spacing: 4px; color: var(--blue); margin-bottom: 8px; }
-        .val { font-family: 'Orbitron'; font-size: 3.8rem; color: var(--gold); text-shadow: 0 0 30px rgba(255, 204, 0, 0.6); }
-        
-        .core { flex: 1; display: flex; justify-content: center; align-items: center; }
-        
-        /* BU KISIM SENİN YÜKLEDİĞİN neon_simurg.jpg DOSYASINI KULLANIR */
-        .btn {
-            width: 300px; height: 300px; border-radius: 50%;
-            background: url('neon_simurg.jpg') center/cover no-repeat;
-            border: 6px solid var(--gold); box-shadow: 0 0 60px rgba(255, 204, 0, 0.4);
-            transition: transform 0.05s; cursor: pointer;
+        :root {
+            --neon-blue: #00f2fe; --neon-purple: #f093fb; --neon-gold: #ffcf33;
+            --bg: #030308; --card-bg: rgba(255, 255, 255, 0.03);
         }
-        .btn:active { transform: scale(0.92); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body {
+            background: var(--bg); color: white; margin: 0; overflow: hidden;
+            height: 100vh; font-family: 'Rajdhani', sans-serif;
+        }
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+
+        /* ARKA PLAN */
+        .stars { position: fixed; width: 100%; height: 100%; background: radial-gradient(circle at center, #0a0a15 0%, #000 100%); z-index: -1; }
+
+        /* HEADER */
+        .header {
+            padding: 15px 20px; border-bottom: 1px solid rgba(0, 242, 254, 0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(15px);
+        }
+        .bal-val { font-size: 28px; font-weight: 900; color: var(--neon-gold); text-shadow: 0 0 15px rgba(255, 207, 51, 0.5); }
+        .stat-small { font-size: 10px; color: var(--neon-blue); letter-spacing: 1px; text-transform: uppercase; font-weight: bold; }
+
+        /* PANEL YAPISI */
+        .panel { display: none; height: 78vh; overflow-y: auto; padding: 20px; padding-bottom: 120px; animation: slideUp 0.3s ease-out; }
+        .panel.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ANA EKRAN (TAP) - SİMURG BURADA */
+        .tap-zone { height: 50vh; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
         
-        .dock { display: flex; justify-content: space-around; padding: 25px; background: #000; border-top: 1px solid var(--blue); }
-        .item { font-family: 'Orbitron'; font-size: 10px; color: #555; font-weight: bold; }
-        .active { color: var(--blue); text-shadow: 0 0 15px var(--blue); }
+        .simurg-btn {
+            width: 250px; height: 250px; border-radius: 50%;
+            /* SENİN YÜKLEDİĞİN DOSYA ADI */
+            background: url('neon_simurg.png') center/cover no-repeat;
+            border: 5px solid var(--neon-gold);
+            box-shadow: 0 0 40px rgba(255, 207, 51, 0.3);
+            cursor: pointer; transition: transform 0.05s;
+            position: relative; z-index: 2;
+        }
+        .simurg-btn:active { transform: scale(0.92); }
+
+        /* ENERJİ BAR */
+        .e-container { width: 100%; padding: 0 10px; margin-top: 30px; }
+        .e-bar { height: 14px; background: #111; border-radius: 7px; overflow: hidden; border: 1px solid #222; position: relative; }
+        .e-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--neon-gold), #ff8800); transition: width 0.3s; }
+        .e-text { position: absolute; width: 100%; text-align: center; font-size: 10px; font-weight: 900; line-height: 14px; color: #fff; text-shadow: 1px 1px #000; }
+
+        /* MARKET & KARTLAR */
+        .card {
+            background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px; padding: 15px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .card-info h4 { margin: 0; font-size: 15px; color: var(--neon-blue); }
+        .card-info p { margin: 4px 0 0; font-size: 12px; color: #aaa; }
         
-        .pop { position: absolute; color: var(--gold); font-family: 'Orbitron'; font-size: 40px; animation: up 0.7s forwards; pointer-events: none; z-index: 10; }
-        @keyframes up { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-150px); } }
+        .action-btn {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            color: #000; border: none; padding: 10px 18px; border-radius: 8px;
+            font-weight: 900; font-size: 12px; cursor: pointer;
+        }
+        .action-btn:active { transform: scale(0.95); }
+
+        /* NAVİGASYON */
+        .nav {
+            position: fixed; bottom: 0; width: 100%; background: #000;
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid rgba(0, 242, 254, 0.2); padding-bottom: 25px;
+        }
+        .nav-item { background: none; border: none; color: #555; padding: 15px 0; font-size: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .nav-item.active { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+
+        /* POPUP TEXT */
+        .pop { position: absolute; color: var(--neon-gold); font-weight: 900; font-size: 32px; pointer-events: none; animation: float 0.8s forwards; text-shadow: 0 0 10px #000; z-index: 10; }
+        @keyframes float { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-130px); } }
     </style>
 </head>
 <body>
-    <div id="app">
-        <div class="status">
-            <div class="label">NEO-ANKARA ENERJİ GÜCÜ</div>
-            <div id="bal" class="val">0</div>
-        </div>
-        <div class="core" id="tap">
-            <div class="btn"></div>
-        </div>
-        <div class="dock">
-            <div class="item">ARSİV</div>
-            <div class="item">GELİŞTİR</div>
-            <div class="item active">MERKEZ</div>
-            <div class="item">İTTİFAK</div>
-            <div class="item">CÜZDAN</div>
+
+<div class="stars"></div>
+
+<div class="header">
+    <div>
+        <div class="bal-val orbitron" id="bal">0</div>
+        <div class="stat-small">GELİR: +<span id="phi">0</span> / SAAT</div>
+    </div>
+    <div style="text-align: right">
+        <div class="stat-small" style="color:var(--neon-purple)">SEVİYE <span id="lvl">1</span></div>
+        <div style="font-weight: 900; font-size: 13px;" id="rank">KADET</div>
+    </div>
+</div>
+
+<div id="p-home" class="panel active">
+    <div class="tap-zone">
+        <div class="simurg-btn" id="tap-btn"></div>
+        
+        <div class="e-container">
+            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; font-weight:700;">
+                <span>🔋 ENERJİ SİSTEMİ</span>
+                <span><span id="e-cur">1000</span> / <span id="e-max">1000</span></span>
+            </div>
+            <div class="e-bar">
+                <div class="e-fill" id="e-fill"></div>
+                <div class="e-text" id="e-perc">%100</div>
+            </div>
         </div>
     </div>
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        let s = parseInt(localStorage.getItem('p')) || 0;
-        const el = document.getElementById('bal');
-        el.innerText = s.toLocaleString();
-        
-        document.getElementById('tap').addEventListener('pointerdown', (e) => {
-            s++; el.innerText = s.toLocaleString();
-            localStorage.setItem('p', s);
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            const p = document.createElement('div');
-            p.className = 'pop'; p.innerText = '+1';
-            p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
-            document.body.appendChild(p);
-            setTimeout(() => p.remove(), 700);
-        });
-    </script>
+</div>
+
+<div id="p-market" class="panel">
+    <h3 class="orbitron" style="font-size:16px; color:var(--neon-gold); margin-bottom:20px; border-left: 4px solid var(--neon-gold); padding-left: 10px;">⚒️ TEKNOLOJİ MERKEZİ</h3>
+    <div id="market-list"></div>
+</div>
+
+<div id="p-wheel" class="panel">
+    <div style="text-align:center; padding-top: 50px;">
+        <h3 class="orbitron" style="color:var(--neon-blue)">🎡 SİMURG ŞANSI</h3>
+        <p style="font-size:12px; color:#777;">Her 24 saatte bir ücretsiz çevir!</p>
+        <button class="action-btn" style="width:80%; padding:20px; margin-top:20px; font-size:16px;" id="spin-btn" onclick="spin()">ÇARKI DÖNDÜR</button>
+    </div>
+</div>
+
+<div id="p-tasks" class="panel">
+    <h3 class="orbitron" style="font-size:16px; color:var(--neon-purple); margin-bottom:20px; border-left: 4px solid var(--neon-purple); padding-left: 10px;">📡 ÖZEL GÖREVLER</h3>
+    <div class="card">
+        <div class="card-info"><h4>Simurg Duyuru Kanalı</h4><p>+100.000 💎</p></div>
+        <button class="action-btn" onclick="doTask(100000)">KATIL</button>
+    </div>
+    <div class="card">
+        <div class="card-info"><h4>Resmi X Hesabı</h4><p>+150.000 💎</p></div>
+        <button class="action-btn" onclick="doTask(150000)">TAKİP ET</button>
+    </div>
+</div>
+
+<div class="nav">
+    <button class="nav-item active" onclick="nav('home')">🏠<br>ÜSSÜM</button>
+    <button class="nav-item" onclick="nav('market')">⚒️<br>MARKET</button>
+    <button class="nav-item" onclick="nav('wheel')">🎡<br>ŞANS</button>
+    <button class="nav-item" onclick="nav('tasks')">📑<br>GÖREV</button>
+</div>
+
+<script>
+let tg = window.Telegram.WebApp; tg.expand();
+
+// VERİ TABANI
+let db = {
+    bal: parseFloat(localStorage.getItem('adn_bal')) || 0,
+    phi: parseFloat(localStorage.getItem('adn_phi')) || 0,
+    lvl: parseInt(localStorage.getItem('adn_lvl')) || 1,
+    e: 1000, eMax: 1000, pwr: 1,
+    items: JSON.parse(localStorage.getItem('adn_items')) || {
+        drill: { n: "Siber Pençe", l: 0, b: 200, i: 15 },
+        bot: { n: "Simurg Botu", l: 0, b: 1500, i: 120 },
+        ship: { n: "Işık Gemisi", l: 0, b: 15000, i: 800 },
+        station: { n: "Galaktik Yuva", l: 0, b: 120000, i: 4500 }
+    }
+};
+
+const ranks = ["KADET", "PİLOT", "MUHAFIZ", "KOMUTAN", "YÜCE SİMURG"];
+
+function save() {
+    localStorage.setItem('adn_bal', db.bal);
+    localStorage.setItem('adn_phi', db.phi);
+    localStorage.setItem('adn_lvl', db.lvl);
+    localStorage.setItem('adn_items', JSON.stringify(db.items));
+}
+
+function updateUI() {
+    document.getElementById('bal').innerText = Math.floor(db.bal).toLocaleString();
+    document.getElementById('phi').innerText = db.phi.toLocaleString();
+    document.getElementById('e-cur').innerText = Math.floor(db.e);
+    document.getElementById('e-max').innerText = db.eMax;
+    let perc = (db.e / db.eMax * 100);
+    document.getElementById('e-fill').style.width = perc + "%";
+    document.getElementById('e-perc').innerText = "%" + Math.floor(perc);
+    document.getElementById('lvl').innerText = db.lvl;
+    document.getElementById('rank').innerText = ranks[Math.min(ranks.length-1, Math.floor(db.lvl/5))];
+}
+
+function renderMarket() {
+    const list = document.getElementById('market-list');
+    list.innerHTML = '';
+    for(let k in db.items) {
+        let it = db.items[k];
+        let cost = Math.floor(it.b * Math.pow(1.2, it.l));
+        list.innerHTML += `
+            <div class="card">
+                <div class="card-info">
+                    <h4>${it.n} <small style="color:#777;">(Seviye ${it.l})</small></h4>
+                    <p>+${it.i}/saat | Maliyet: ${cost.toLocaleString()} 💎</p>
+                </div>
+                <button class="action-btn" onclick="buy('${k}')">YÜKSELT</button>
+            </div>`;
+    }
+}
+
+function buy(k) {
+    let it = db.items[k];
+    let cost = Math.floor(it.b * Math.pow(1.2, it.l));
+    if(db.bal >= cost) {
+        db.bal -= cost; it.l++; db.phi += it.i;
+        if(it.l % 3 === 0) db.lvl++;
+        tg.HapticFeedback.notificationOccurred('success');
+        save(); updateUI(); renderMarket();
+    } else { tg.showAlert("Yetersiz Kristal!"); }
+}
+
+// TIKLAMA OLAYI
+document.getElementById('tap-btn').addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if(db.e >= db.pwr) {
+        db.bal += db.pwr; db.e -= db.pwr;
+        const touch = e.touches[0];
+        pop(touch.clientX, touch.clientY, "+" + db.pwr);
+        updateUI();
+        tg.HapticFeedback.impactOccurred('medium');
+    }
+});
+
+function pop(x,y,t) {
+    const d = document.createElement('div'); d.className='pop orbitron';
+    d.style.left=x+'px'; d.style.top=y+'px'; d.innerText=t;
+    document.body.appendChild(d); setTimeout(()=>d.remove(), 800);
+}
+
+function spin() {
+    tg.showAlert("Şans çarkı simülasyonu başlatılıyor...");
+    setTimeout(() => {
+        let win = 50000;
+        db.bal += win;
+        tg.showAlert("Tebrikler! " + win.toLocaleString() + " Kristal kazandın!");
+        updateUI(); save();
+    }, 1500);
+}
+
+// ANA DÖNGÜ
+setInterval(() => {
+    if(db.e < db.eMax) db.e = Math.min(db.eMax, db.e + 1); 
+    if(db.phi > 0) db.bal += (db.phi / 3600); 
+    updateUI();
+}, 1000);
+
+// KAYIT DÖNGÜSÜ
+setInterval(save, 5000);
+
+function nav(id) {
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+    document.getElementById('p-'+id).classList.add('active');
+    event.currentTarget.classList.add('active');
+    if(id==='market') renderMarket();
+}
+
+function doTask(r) {
+    tg.showAlert("Görev kontrol ediliyor...");
+    setTimeout(() => { db.bal += r; updateUI(); save(); tg.showAlert("Ödül Hesabına Eklendi!"); }, 2000);
+}
+
+updateUI();
+</script>
 </body>
 </html>
