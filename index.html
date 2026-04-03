@@ -10,14 +10,12 @@
         :root { --neon-gold: #ffcc00; --neon-blue: #00f2ff; --deep-bg: #020202; }
         body { margin: 0; background: var(--deep-bg); color: white; font-family: 'Rajdhani', sans-serif; overflow: hidden; user-select: none; }
         
-        /* FÜTÜRİSTİK ARKA PLAN */
         #app { 
             height: 100vh; display: flex; flex-direction: column;
-            background: linear-gradient(180deg, #0a0a0a 0%, #000 100%);
-            position: relative;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
         }
 
-        /* ÜST PANEL: ENERJİ DURUMU */
+        /* ÜST PANEL */
         .status-bar {
             padding: 25px; text-align: center; border-bottom: 2px solid rgba(0, 242, 255, 0.2);
             background: rgba(255,255,255,0.02); backdrop-filter: blur(10px);
@@ -25,38 +23,38 @@
         .label { font-family: 'Orbitron'; font-size: 10px; letter-spacing: 3px; color: var(--neon-blue); margin-bottom: 5px; }
         .energy-value { font-family: 'Orbitron'; font-size: 3.2rem; color: var(--neon-gold); text-shadow: 0 0 20px rgba(255, 204, 0, 0.6); }
 
-        /* ANA SİMURG BUTONU */
+        /* ANA SİMURG BUTONU (GÖRSEL BURADA DEĞİŞİYOR) */
         .core { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
         .simurg-avatar {
-            width: 300px; height: 300px; border-radius: 50%;
-            background: url('https://img.freepik.com/free-vector/gradient-phoenix-logo-design_23-2149481968.jpg') center/cover;
-            border: 4px solid var(--neon-gold); box-shadow: 0 0 40px rgba(255, 204, 0, 0.2);
+            width: 320px; height: 320px; border-radius: 50%;
+            /* BURADAKİ LİNK ARTIK SİGORTA VEYA ÇİÇEK DEĞİL, GERÇEK SİMURG LOGOSU */
+            background: url('https://img.freepik.com/premium-vector/phoenix-gradient-logo-design_451085-11.jpg') center/cover;
+            border: 5px solid var(--neon-gold); box-shadow: 0 0 50px rgba(255, 204, 0, 0.3);
             transition: transform 0.05s; z-index: 2;
         }
-        .simurg-avatar:active { transform: scale(0.9); }
+        .simurg-avatar:active { transform: scale(0.92); }
 
-        /* ALT NAVİGASYON (SADE VE ŞIK) */
+        /* ALT MENÜ (SİGORTASIZ) */
         .dock { 
             display: flex; justify-content: space-around; padding: 25px; 
-            background: rgba(0,0,0,0.9); border-top: 1px solid var(--neon-blue);
+            background: #000; border-top: 1px solid var(--neon-blue);
         }
-        .dock-item { font-family: 'Orbitron'; font-size: 9px; color: #555; cursor: pointer; transition: 0.3s; }
-        .dock-item.active { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+        .dock-item { font-family: 'Orbitron'; font-size: 9px; color: #555; font-weight: bold; }
+        .active { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
 
-        /* EFEKTLER */
+        /* TIKLAMA EFEKTİ */
         .tap-effect {
-            position: absolute; color: var(--neon-gold); font-family: 'Orbitron'; font-weight: bold;
-            font-size: 32px; animation: floatUp 0.6s ease-out forwards; pointer-events: none;
+            position: absolute; color: var(--neon-gold); font-family: 'Orbitron';
+            font-size: 35px; animation: floatUp 0.6s ease-out forwards; pointer-events: none;
         }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-150px) scale(1.5); } }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-120px); } }
     </style>
 </head>
 <body>
     <div id="app">
         <div class="status-bar">
-            <div class="label">TOPLAM ENERJİ GÜCÜ</div>
+            <div class="label">NEO-ANKARA ENERJİ GÜCÜ</div>
             <div class="energy-value" id="balance">0</div>
-            <div style="font-size: 12px; color: var(--neon-blue); margin-top: 5px;">⚡ +1.2 GW/TIK</div>
         </div>
 
         <div class="core" id="main-btn">
@@ -65,7 +63,7 @@
 
         <div class="dock">
             <div class="dock-item">ARSİV</div>
-            <div class="dock-item">GÜÇLENDİR</div>
+            <div class="dock-item">GELİŞTİR</div>
             <div class="dock-item active">MERKEZ</div>
             <div class="dock-item">İTTİFAK</div>
             <div class="dock-item">CÜZDAN</div>
@@ -75,7 +73,6 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#0a0a0a';
 
         let score = parseInt(localStorage.getItem('simurg_power')) || 0;
         const balEl = document.getElementById('balance');
@@ -86,17 +83,13 @@
             balEl.innerText = score.toLocaleString();
             localStorage.setItem('simurg_power', score);
             
-            // Haptic (Titreşim)
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 
-            // Görsel Efekt
-            const clickX = e.clientX || window.innerWidth / 2;
-            const clickY = e.clientY || window.innerHeight / 2;
             const effect = document.createElement('div');
             effect.className = 'tap-effect';
             effect.innerText = '+1';
-            effect.style.left = clickX + 'px';
-            effect.style.top = clickY + 'px';
+            effect.style.left = e.clientX + 'px';
+            effect.style.top = e.clientY + 'px';
             document.body.appendChild(effect);
             setTimeout(() => effect.remove(), 600);
         });
